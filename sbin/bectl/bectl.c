@@ -206,14 +206,14 @@ bectl_cmd_create(int argc, char *argv[])
 	bool recursive;
 
 	snapname = NULL;
-	recursive = false;
+	recursive = true;
 	while ((opt = getopt(argc, argv, "e:r")) != -1) {
 		switch (opt) {
 		case 'e':
 			snapname = optarg;
 			break;
 		case 'r':
-			recursive = true;
+			// noop. used to set recursive to true
 			break;
 		default:
 			fprintf(stderr, "bectl create: unknown option '-%c'\n",
