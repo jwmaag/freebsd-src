@@ -1015,6 +1015,7 @@ be_export(libbe_handle_t *lbh, const char *bootenv, int fd)
 {
 	char snap_name[BE_MAXPATHLEN];
 	char buf[BE_MAXPATHLEN];
+	char *snap = snap_name;
 	zfs_handle_t *zfs;
 	sendflags_t flags = { 0 };
 	int err;
@@ -1023,12 +1024,16 @@ be_export(libbe_handle_t *lbh, const char *bootenv, int fd)
 		/* Use the error set by be_snapshot */
 		return (err);
 
-	be_root_concat(lbh, snap_name, buf);
+	be_root_concat(lbh, bootenv, buf);
+
+	// remove bootenv and @ from snap_name
+	snap += strlen(bootenv) + 1;
 
 	if ((zfs = zfs_open(lbh->lzh, buf, ZFS_TYPE_DATASET)) == NULL)
 		return (set_error(lbh, BE_ERR_ZFSOPEN));
 
-	err = zfs_send_one(zfs, NULL, fd, &flags, /* redactbook */ NULL);
+	flags.replicate = true;
+	err = zfs_send(zfs, NULL, snap, &flags, fd, NULL, NULL, NULL);
 	zfs_close(zfs);
 
 	return (err);
